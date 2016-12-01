@@ -6,6 +6,7 @@ __pycache__/
 # config / INI files
 *.ini
 *.cfg
+db_create.py
 
 # Instance folder
 /instance
