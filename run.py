@@ -1,16 +1,7 @@
 # run.py
 
-#################
-#### imports ####
-#################
+# run.py
+from project import app
+if __name__ == "__main__":
+    app.run()
 
-from flask import Flask
-
-################
-#### config ####
-################
-
-app = Flask(__name__, instance_relative_config=True)
-app.config.from_pyfile('flask.cfg')
-
-from . import views
