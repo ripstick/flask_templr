@@ -45,14 +45,16 @@ class UsersTests(unittest.TestCase):
             follow_redirects=True
         )
 
+    def login(self, email, password):
+        return self.app.post(
+            '/login',
+            data=dict(email=email, password=password),
+            follow_redirects=True
+        )
 
     ###############
     #### tests ####
     ###############
-
-    def test_login_page(self):
-        response = self.app.get('/login', follow_redirects=True)
-        self.assertIn(b'Future site for logging into Kennedy Family Recipes!', response.data)
 
     def test_user_registration_form_displays(self):
         response = self.app.get('/register')
@@ -61,21 +63,49 @@ class UsersTests(unittest.TestCase):
 
     def test_valid_user_registration(self):
         self.app.get('/register', follow_redirects=True)
-        response = self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        response = self.register('wilsonjs0311@gmail.com', 'marine0311', 'marine0311')
         self.assertIn(b'Thanks for registering!', response.data)
 
     def test_duplicate_email_user_registration_error(self):
         self.app.get('/register', follow_redirects=True)
-        self.register('patkennedy79@yahoo.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.register('wilsonjs0311@gmail.com', 'marine0311', 'marine0311')
         self.app.get('/register', follow_redirects=True)
-        response = self.register('patkennedy79@yahoo.com', 'FlaskIsReallyAwesome', 'FlaskIsReallyAwesome')
-        self.assertIn(b'ERROR! Email (patkennedy79@yahoo.com) already exists.', response.data)
+        response = self.register('wilsonjs0311@gmail.com', 'marine0311', 'marine0311')
+        self.assertIn(b'ERROR! Email (wilsonjs0311@gmail.com) already exists.', response.data)
 
     def test_missing_field_user_registration_error(self):
         self.app.get('/register', follow_redirects=True)
-        response = self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', '')
+        response = self.register('wilsonjs0311@gmail.com', 'marine0311', '')
         self.assertIn(b'This field is required.', response.data)
 
+    def test_login_form_displays(self):
+        response = self.app.get('/login')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Log In', response.data)
+
+    def test_valid_login(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('wilsonjs0311@gmail.com', 'marine0311', 'marine0311')
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('wilsonjs0311@gmail.com', 'marine0311')
+        self.assertIn(b'Welcome, wilsonjs0311@gmail.com!', response.data)
+
+    def test_login_without_registering(self):
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('wilsonjs0311@gmail.com', 'marine0311')
+        self.assertIn(b'ERROR! Incorrect login credentials.', response.data)
+
+    def test_valid_logout(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('wilsonjs0311@gmail.com', 'marine0311', 'marine0311')
+        self.app.get('/login', follow_redirects=True)
+        self.login('wilsonjs0311@gmail.com', 'marine0311')
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertIn(b'Goodbye!', response.data)
+
+    def test_invalid_logout_within_being_logged_in(self):
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertIn(b'Log In', response.data)
 
 if __name__ == "__main__":
     unittest.main()
